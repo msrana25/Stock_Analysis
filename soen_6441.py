@@ -21,7 +21,7 @@ def server_connection(host_name, username, pwd):
 
 
 # Creating connection with mysql
-connection = server_connection('localhost', 'root', 'ManuRana007$')
+connection = server_connection('localhost', 'root', 'abcd#')
 
 
 # Creating database after establishing the connection
