@@ -1,26 +1,13 @@
 import requests
 from mysql.connector import Error
-import database_connection
+import soen_6441_database_connection
 from datetime import datetime, date, timedelta
 import plotly.graph_objects as go
 
 stocks = ['GOOGL', 'META', 'AAPL', 'AMZN']
 
 # Creating connection with mysql
-connection = database_connection.server_connection('localhost', 'root', database_connection.get_db_password)
-
-
-# Creating database after establishing the connection
-def create_database(ser_connection, query):
-    cursor = ser_connection.cursor()
-    try:
-        cursor.execute(query)
-        print("Database created successfully")
-    except Error as err:
-        print(f"Error: '{err}'")
-
-
-# create_database(connection, "CREATE DATABASE SOEN6441")
+connection = soen_6441_database_connection.server_connection('localhost', 'root', soen_6441_database_connection.get_db_password())
 
 
 def execute_query(ser_connection, query):
@@ -33,33 +20,7 @@ def execute_query(ser_connection, query):
         print(f"Error: '{err}'")
 
 
-create_table_stocks = """CREATE TABLE MASTER_STOCKS (  STOCKNAME VARCHAR(1000),
-                                                SYMBOL VARCHAR(20) PRIMARY KEY,
-                                                SECTOR VARCHAR(1000),
-                                                INDUSTRY VARCHAR(2000),
-                                                MARKETCAP BIGINT,
-                                                ASSETTYPE VARCHAR(300),
-                                                COMPANY_DESCRIPTION VARCHAR(10000)
-                                                )"""
-
 execute_query(connection, "use SOEN6441")
-
-
-# execute_query(connection, create_table_stocks)
-
-
-def add_master_stocks_data(stocks_master_data):
-    for stock in stocks_master_data:
-        url = 'https://www.alphavantage.co/query?function=OVERVIEW&symbol=%s&apikey=7NVAEAZYAXPYKMZB' % stock
-        stock_data = requests.get(url).json()
-        stock_query = """INSERT INTO MASTER_STOCKS VALUES ('%s', '%s', '%s', '%s', '%d', '%s', "%s")""" % (
-            stock_data['Name'], stock_data['Symbol'], stock_data['Sector'], stock_data['Industry'],
-            int(stock_data['MarketCapitalization']), stock_data['AssetType'], stock_data['Description'])
-
-        execute_query(connection, stock_query)
-
-
-# add_master_stocks_data(stocks)
 
 
 # ID INT AUTO_INCREMENT PRIMARY KEY,
@@ -77,13 +38,11 @@ def create_stock_tables(all_stocks):
         execute_query(connection, create_table)
 
 
-# create_stock_tables(stocks)
-
 def get_values(data):
     intraday_values = []
-    for datetime in data:
-        intraday_values.append([datetime, float(data[datetime]['1. open']), float(data[datetime]['2. high']),
-                                float(data[datetime]['3. low']), float(data[datetime]['4. close'])])
+    for date_time in data:
+        intraday_values.append([date_time, float(data[date_time]['1. open']), float(data[date_time]['2. high']),
+                                float(data[date_time]['3. low']), float(data[date_time]['4. close'])])
     return intraday_values
 
 
@@ -279,7 +238,6 @@ def update_weekly_data(ser_connection, all_stocks):
 # plotting the graph for intraday, hourly, daily and weekly
 
 def graph_visualisation(x_axis, y_axis, custom, label):
-    print("in graph")
     fig = go.Figure()
 
     fig.add_trace(
@@ -334,4 +292,4 @@ def plot(ser_connection, frequency, stock_name):
                         stock_name[0].upper())
 
 
-plot(connection, 'intraday', ['googl'])
+plot(connection, 'daily', ['googl'])
