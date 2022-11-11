@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# !pip install plotly
 
-# In[33]:
+# In[1]:
 
 
 import json
@@ -15,13 +15,15 @@ from datetime import datetime, date, timedelta
 import plotly.graph_objects as go
 
 
-# In[47]:
+# In[2]:
 
 
 stocks = ['GOOGL', 'META', 'AAPL', 'AMZN']
+intraday_data = {}
 hourly_data = {}
 daily_data = {}
 weekly_data = {}
+
 global stock_choice
 stock_choice = stocks[0]
 
@@ -50,7 +52,7 @@ stock_choice = stocks[0]
 #         
 # create_database(server, "CREATE DATABASE SOEN6441")
 
-# In[35]:
+# In[3]:
 
 
 #CREATE A CONNECTION TO DATABASE
@@ -67,7 +69,7 @@ def create_db_connection(host_name, username, pwd, db_name):
 connection = create_db_connection('localhost', 'root', '#Snroshan1998', "SOEN6441")
 
 
-# In[36]:
+# In[4]:
 
 
 #FUNCTION TO EXECUTE A QUERY
@@ -81,7 +83,7 @@ def execute_query(connection, mysql_query):
         print("Error: ", e)
 
 
-# In[38]:
+# In[5]:
 
 
 #FUNCTION TO READ A QUERY
@@ -94,6 +96,14 @@ def read_query(connection, mysql_query):
         return result
     except Error as e:
         print("Error: ", e)
+
+
+# In[1]:
+
+
+def savedata(fname, data):
+    with open('json_data/%s.json'%(fname), 'w') as f:
+        f.write(json.dumps(data))
 
 
 #                                                     #CREATE TABLE STOCKS
@@ -157,7 +167,31 @@ def read_query(connection, mysql_query):
 #                                                                                            
 # update_intraday_values(stocks)
 
-# In[48]:
+# In[12]:
+
+
+check = read_query(connection, """SELECT * FROM GOOGL WHERE DATENTIME LIKE "2022-11-04 20:00:00" """)
+print(check[0][1])
+
+
+# In[7]:
+
+
+#Get Intraday Data
+def get_intraday_data(connection, stocks):
+    for stock in stocks:
+        intraday_data[stock] = {}
+        query = """SELECT * FROM %s"""%(stock)
+        val = read_query(connection, query)
+        for i in val:
+            intraday_data[stock][str(i[2])] = {'Open': i[3], 'High': i[4], 'Low': i[5], 'Close': i[6]}
+    
+    savedata('intraday_data', intraday_data)
+    return intraday_data
+get_intraday_data(connection, stocks)
+
+
+# In[8]:
 
 
 #OBTAIN HOURLY DATA
@@ -183,15 +217,17 @@ def update_hourly_data(connection, stocks):
                 high_value.append(read_query(connection, """SELECT HIGH FROM {0} WHERE DATENTIME LIKE "{1}" """.format(stock, res1[hours][0]))[0][0])
                 low_value.append(read_query(connection, """SELECT LOW FROM {0} WHERE DATENTIME LIKE "{1}" """.format(stock, res1[hours][0]))[0][0])
             
-            hourly_stock_data[result[i][0]] = {"Open": open_value, "High": max(high_value), "Low": min(low_value), "Close": close_value}
+            hourly_stock_data[str(result[i][0])] = {"Open": open_value, "High": max(high_value), "Low": min(low_value), "Close": close_value}
 
         hourly_data[stock] = hourly_stock_data
+        
+    savedata('hourly_data', hourly_data)
     return hourly_data
 
 update_hourly_data(connection, stocks)
 
 
-# In[49]:
+# In[9]:
 
 
 #OBTAIN DAILY DATA
@@ -210,15 +246,17 @@ def update_daily_data(connection, stocks):
             high = [hourly_data[stock][val]['High'] for val in hourly_data[stock] if(str(result[i][0]) == str(val).split()[0])]
             low = [hourly_data[stock][val]['Low'] for val in hourly_data[stock] if(str(result[i][0]) == str(val).split()[0])]
 
-            daily_stock_data[result[i][0]] = {"Open": open_value, "High": max(high), "Low": min(low), "Close": close_value}
+            daily_stock_data[str(result[i][0])] = {"Open": open_value, "High": max(high), "Low": min(low), "Close": close_value}
 
         daily_data[stock] = daily_stock_data
+    
+    savedata('daily_data', daily_data)
     return daily_data
     
 update_daily_data(connection, stocks)
 
 
-# In[50]:
+# In[10]:
 
 
 #OBTAIN WEEKLY DATA
@@ -232,58 +270,10 @@ def update_weekly_data(stocks):
             high_value = [daily_data[stock][temp[j]]['High'] for j in range(i, i+5)]
             low_value = [daily_data[stock][temp[j]]['Low'] for j in range(i, i+5)]
             
-            weekly_data[stock][temp[i]] = {'Open': open_value, "High": max(high_value), "Low": min(low_value), "Close": close_value}
+            weekly_data[stock][str(temp[i])] = {'Open': open_value, "High": max(high_value), "Low": min(low_value), "Close": close_value}
+    
+    savedata('weekly_data', weekly_data)
     return weekly_data
 
 update_weekly_data(stocks)
 
-
-# In[54]:
-
-
-def graph_visualisation(x_axis, y_axis, custom, label):
-    fig = go.Figure()
-
-    fig.add_trace(
-        go.Scatter(
-            x=x_axis,
-            y=y_axis,
-            customdata=custom,
-            hovertemplate='<br>'.join([
-                'Open : $%{y:.2f}',
-                'Date : %{x}',
-                '%{customdata[0]}',
-                '%{customdata[1]}',
-                '%{customdata[2]}'
-            ]),
-        )
-    )
-    fig.update_layout(xaxis_title="Date", yaxis_title=f'{label}')
-    fig.show()
-
-
-def plot(ser_connection, frequency, stock_name):
-    global stock_choice
-    stock_choice = stock_name
-    print(stock_choice)
-    datetime, close_val, extras = [], [], []
-    if frequency == 'weekly':
-        data = weekly_data
-
-    if frequency == 'daily':
-        data = daily_data
-
-    if frequency == 'hourly':
-        data = hourly_data
-
-    if frequency == 'intraday':
-        data = visualise_intraday_values(ser_connection, stock_name)
-
-    for i in data[stock_name]:
-        datetime.append(i)
-        close_val.append(float(data[stock_name][i]['Close']))
-        extras.append(["Open: " + str(data[stock_name][i]['Open']), "High: " + str(data[stock_name][i]['High']), "Low: " + str(data[stock_name][i]['Low'])])
-
-    
-    extras.reverse()
-    graph_visualisation(datetime, close_val, extras, stock_name.upper())
