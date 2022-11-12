@@ -29,7 +29,6 @@ class System:
 
 #Get Intraday data and update the database
     def get_intraday_data(self, stocks, interval = '15min'):
-        print("Inside Intraday")
         for stock in stocks:
             values = []
             self.intraday_data[stock] = {}
@@ -46,8 +45,6 @@ class System:
 
 #Compute and Get Hourly Data from the Database
     def get_hourly_data(self):
-        print("Inside Hourly")
-
         for stock in self.stocks:
             self.hourly_data[stock] = self.database.retrieve_hourly_data(self.database.connection, stock)
 
@@ -58,7 +55,6 @@ class System:
 
 #Compute and Get Weekly Data from daily_data
     def get_weekly_data(self):
-        print("Inside Weekly")
         for stock in self.stocks:
             temp = list(self.daily_data[stock]) #Stores all dates
             self.weekly_data[stock] = {}

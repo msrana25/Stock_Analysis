@@ -12,10 +12,8 @@ class GraphicalUI:
         self.sys = System.System()
         self.HEIGHT = 650
         self.WIDTH = 1000
-        print("Dimensions set")
         self.delete_images()
         self.setup_frames()
-        print(self.sys.stocks)
         self.create_stock_buttons(self.sys.stocks)
         self.root.mainloop()
 
@@ -131,6 +129,3 @@ class GraphicalUI:
         self.create_time_buttons(stock_name)
         self.create_TA_dropdown()
         self.graph_visualisation(datetime, close_val, extras, stock_name.upper(), frequency)
-        
-
-GUI = GraphicalUI()

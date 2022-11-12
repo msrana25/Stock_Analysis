@@ -4,16 +4,16 @@ from mysql.connector import Error
 class Database: 
     
 
-    host, user, pwd, dbName = '', '', '', ''
+    host, user, pwd, db_name = '', '', '', ''
 
-    def __init__(self, host, user, password, dbName, stocks):
+    def __init__(self, host, user, password, database, stocks):
         self.host = host
         self.user = user
         self.pwd = password
-        self.dbName = dbName
+        self.db_name = database
         self.connection = self.connect_to_database()
         self.execute_query(self.connection, self.create_table_stocks)
-        #DB.add_stocks(DB.stocks)
+        #self.add_stocks(self.stocks)
         self.create_stock_tables(stocks)
 
 
@@ -50,10 +50,10 @@ class Database:
                 existing_db = self.read_query(connection, "SHOW DATABASES")
                 if ('soen6441',) not in existing_db:
                     self.execute_query(connection, "CREATE DATABASE SOEN6441")
-                    print("Created Database: ", self.dbName)
+                    print("Created Database: ", self.db_name)
 
-                connection = mysql.connector.connect(host = self.host, user = self.user, passwd = self.pwd, database = self.dbName)
-                print("Connected to Database: ", self.dbName)
+                connection = mysql.connector.connect(host = self.host, user = self.user, passwd = self.pwd, database = self.db_name)
+                print("Connected to Database: ", self.db_name)
             except Error as e:
                 print("Error: ", e)
 
@@ -93,6 +93,7 @@ class Database:
 
 #Store Intraday Data in the Database
     def update_intraday_data(self, connection, stock_symbol, stock_data):
+        self.execute_query(connection, "TRUNCATE TABLE %s" %(stock_symbol))
         for num, item in zip(range(1, len(stock_data) + 1), stock_data):
                 intraday_update_query= """INSERT INTO %s VALUES (%s, '%s', '%s', %f, %f, %f, %f)""" % (stock_symbol, num, stock_symbol, item[0], item[1], item[2], item[3], item[4])
                 self.execute_query(connection, intraday_update_query)                                                                                         
@@ -142,8 +143,3 @@ class Database:
 
         return daily_stock_data
     
-# stocks = ['GOOGL', 'META', 'AAPL', 'AMZN']
-
-# DB = Database('localhost', 'root', "#Snroshan1998", 'soen6441', stocks)
-# connection = DB.connect_to_database()
-# print(DB.create_table_stocks)
