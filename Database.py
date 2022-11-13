@@ -1,16 +1,18 @@
 import mysql.connector
 from mysql.connector import Error
+import DB_connector as dbc
 
 
 class Database:
     host, user, pwd, db_name = '', '', '', ''
+    ser_connection = dbc.DBConnector.get_connection_object('localhost', 'root', '#abcd', 'soen6441')
 
     def __init__(self, host, user, password, database, stocks):
         self.host = host
         self.user = user
         self.pwd = password
         self.db_name = database
-        self.connection = self.connect_to_database()
+        self.connection = Database.ser_connection
         self.execute_query(self.connection, self.create_table_stocks)
         self.create_stock_tables(stocks)
 
@@ -38,25 +40,6 @@ class Database:
             if verbose:
                 print("Error: ", e)
 
-    # Connect to the Database
-    def connect_to_database(self):
-        connection = None
-        try:
-            connection = mysql.connector.connect(host=self.host, user=self.user, passwd=self.pwd)
-            print("Connected to Server: Admin")
-            existing_db = self.read_query(connection, "SHOW DATABASES")
-            if ('soen6441',) not in existing_db:
-                self.execute_query(connection, "CREATE DATABASE SOEN6441")
-                print("Created Database: ", self.db_name)
-
-            connection = mysql.connector.connect(host=self.host, user=self.user, passwd=self.pwd, database=self.db_name)
-            print("Connected to Database: ", self.db_name)
-
-        except Error as e:
-            print("Error: ", e)
-
-        return connection
-
     # Create Table Stocks
     create_table_stocks = """CREATE TABLE STOCKS (  STOCKNAME VARCHAR(1000),
                                                     SYMBOL VARCHAR(20) PRIMARY KEY,
@@ -69,6 +52,8 @@ class Database:
 
     # update stock master information. This is master data and won't be updated every run.
     def add_stocks_to_db(self, connection, stock_data):
+        stock_delete_query = """DELETE FROM STOCKS WHERE SYMBOL = %s""" % (stock_data['Symbol'])
+        self.execute_query(connection, stock_delete_query)
         stock_query = """INSERT INTO STOCKS VALUES ('%s', '%s', '%s', '%s', '%d', '%s', "%s")""" % (
             stock_data['Name'], stock_data['Symbol'], stock_data['Sector'], stock_data['Industry'],
             int(stock_data['MarketCapitalization']), stock_data['AssetType'], stock_data['Description'])
@@ -83,7 +68,8 @@ class Database:
                                                 HIGH FLOAT(9, 4), 
                                                 LOW FLOAT(9, 4), 
                                                 CLOSE FLOAT(9, 4), 
-                                                CONSTRAINT FK_SYMBOL_%s FOREIGN KEY (STOCKSYMBOL) REFERENCES STOCKS(SYMBOL))""" % (stock, stock)
+                                                CONSTRAINT FK_SYMBOL_%s FOREIGN KEY (STOCKSYMBOL) REFERENCES STOCKS(SYMBOL))""" % (
+                stock, stock)
 
             self.execute_query(self.connection, create_table)
 
@@ -168,5 +154,3 @@ class Database:
                                                    "Close": close_value}
 
         return daily_stock_data
-
-

@@ -17,7 +17,7 @@ class Test:
 
     def test_database_connection(self):
         db_obj = db.Database('localhost', 'root', "#abcd", 'soen6441', ['GOOGL'])
-        out = str(type(db_obj.connect_to_database()))
+        out = str(type(db_obj.ser_connection))
         assert out == '<class \'mysql.connector.connection_cext.CMySQLConnection\'>'
 
     @pytest.fixture()
@@ -37,7 +37,7 @@ class Test:
 
     @pytest.mark.skip
     def test_database_loading(self, database_object, system_object, intraday_dict):
-        connection = database_object.connect_to_database()
+        connection = database_object.ser_connection
         count = database_object.read_query(connection, "select count(1) from GOOGL")
         assert (count[0][0] >= 1000)
 
@@ -51,8 +51,8 @@ class Test:
 
     @pytest.mark.skip
     def test_data_values_hourly(self, database_object, system_object):
-        connection = database_object.connect_to_database()
-        system_object.get_hourly_data(database_object.connect_to_database())
+        connection = database_object.ser_connection
+        system_object.get_hourly_data(database_object.ser_connection)
         out_hourly_open = system_object.hourly_data['GOOGL']['2022-11-11 18:00:00']['Open']
         out_hourly_low = system_object.hourly_data['GOOGL']['2022-11-11 18:00:00']['Low']
         assert out_hourly_open == 96.2
@@ -60,15 +60,16 @@ class Test:
 
     @pytest.mark.skip
     def test_data_values_daily(self, database_object, system_object):
-        connection = database_object.connect_to_database()
-        system_object.get_daily_data(database_object.connect_to_database())
+        connection = database_object.ser_connection
+        system_object.get_daily_data(database_object.ser_connection)
         out_daily_high = system_object.daily_data['GOOGL']['2022-11-11']['High']
         out_daily_low = system_object.daily_data['GOOGL']['2022-11-11']['Low']
         assert out_daily_high == 96.93
         assert out_daily_low == 93.706
 
+    @pytest.mark.skip
     def test_data_values_weekly(self, database_object, system_object):
-        connection = database_object.connect_to_database()
+        connection = database_object.ser_connection
         system_object.get_daily_data(connection)
         out_weekly_high = system_object.weekly_data['GOOGL']['2022-11-04']['High']
         out_weekly_open = system_object.weekly_data['GOOGL']['2022-11-04']['Open']
