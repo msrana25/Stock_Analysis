@@ -28,14 +28,9 @@ class System:
               "for successfull execution of upcoming steps ")
         time.sleep(60)
 
-<<<<<<< HEAD
     # Get Intraday data and update the database
     def get_intraday_data(self, stocks, interval='15min'):
         print("Refreshing the database with the latest data. Please wait while we load visualizations for you...")
-=======
-#Get Intraday data and update the database
-    def get_intraday_data(self, stocks, interval = '15min'):
->>>>>>> 90f66e589bd5df0c8dcbe722161ae059ba0ea3e8
         for stock in stocks:
             values = []
             self.intraday_data[stock] = {}
@@ -53,16 +48,9 @@ class System:
                                                        'Close': float(data[datetime]['4. close'])}
             self.database.update_intraday_data(self.database.connection, stock, values)
 
-<<<<<<< HEAD
     # Compute and Get Hourly Data from the Database.
     '''Added connection parameter for hourly to implement unit testing'''
     def get_hourly_data(self, connection):
-=======
-
-
-#Compute and Get Hourly Data from the Database
-    def get_hourly_data(self):
->>>>>>> 90f66e589bd5df0c8dcbe722161ae059ba0ea3e8
         for stock in self.stocks:
             self.hourly_data[stock] = self.database.retrieve_hourly_data(connection, stock)
 
