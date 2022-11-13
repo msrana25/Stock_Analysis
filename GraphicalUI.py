@@ -24,7 +24,11 @@ class GraphicalUI:
         self.sys = System.System()
         self.HEIGHT = 650
         self.WIDTH = 1000
+<<<<<<< HEAD
         GraphicalUI.delete_images()
+=======
+        self.delete_images()
+>>>>>>> 90f66e589bd5df0c8dcbe722161ae059ba0ea3e8
         self.setup_frames()
         self.create_stock_buttons(self.sys.stocks)
         self.root.mainloop()
@@ -136,9 +140,17 @@ class GraphicalUI:
                            "Low: " + str(data[stock_name][i]['Low'])])
 
         extras.reverse()
+<<<<<<< HEAD
 
         self.create_time_buttons(stock_name)
         self.create_ta_dropdown()
         self.graph_visualisation(datetime, close_val, extras, stock_name.upper(), frequency)
 
 
+=======
+        
+        
+        self.create_time_buttons(stock_name)
+        self.create_TA_dropdown()
+        self.graph_visualisation(datetime, close_val, extras, stock_name.upper(), frequency)
+>>>>>>> 90f66e589bd5df0c8dcbe722161ae059ba0ea3e8

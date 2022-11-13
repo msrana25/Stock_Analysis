@@ -2,7 +2,10 @@ import mysql.connector
 from mysql.connector import Error
 
 
+<<<<<<< HEAD
 class Database:
+=======
+>>>>>>> 90f66e589bd5df0c8dcbe722161ae059ba0ea3e8
     host, user, pwd, db_name = '', '', '', ''
 
     def __init__(self, host, user, password, database, stocks):
@@ -12,6 +15,10 @@ class Database:
         self.db_name = database
         self.connection = self.connect_to_database()
         self.execute_query(self.connection, self.create_table_stocks)
+<<<<<<< HEAD
+=======
+        #self.add_stocks(self.stocks)
+>>>>>>> 90f66e589bd5df0c8dcbe722161ae059ba0ea3e8
         self.create_stock_tables(stocks)
 
     # Execute SQL Query
@@ -40,6 +47,7 @@ class Database:
 
     # Connect to the Database
     def connect_to_database(self):
+<<<<<<< HEAD
         connection = None
         try:
             connection = mysql.connector.connect(host=self.host, user=self.user, passwd=self.pwd)
@@ -51,6 +59,21 @@ class Database:
 
             connection = mysql.connector.connect(host=self.host, user=self.user, passwd=self.pwd, database=self.db_name)
             print("Connected to Database: ", self.db_name)
+=======
+            connection = None
+            try:
+                connection = mysql.connector.connect(host = self.host, user = self.user, passwd = self.pwd)
+                print("Connected to Server: Admin")
+                existing_db = self.read_query(connection, "SHOW DATABASES")
+                if ('soen6441',) not in existing_db:
+                    self.execute_query(connection, "CREATE DATABASE SOEN6441")
+                    print("Created Database: ", self.db_name)
+
+                connection = mysql.connector.connect(host = self.host, user = self.user, passwd = self.pwd, database = self.db_name)
+                print("Connected to Database: ", self.db_name)
+            except Error as e:
+                print("Error: ", e)
+>>>>>>> 90f66e589bd5df0c8dcbe722161ae059ba0ea3e8
 
         except Error as e:
             print("Error: ", e)
@@ -90,7 +113,11 @@ class Database:
     # Store Intraday Data in the Database
     # Intraday data will be fetched from API every run and updated in DB
     def update_intraday_data(self, connection, stock_symbol, stock_data):
+<<<<<<< HEAD
         self.execute_query(connection, "TRUNCATE TABLE %s" % stock_symbol)
+=======
+        self.execute_query(connection, "TRUNCATE TABLE %s" %(stock_symbol))
+>>>>>>> 90f66e589bd5df0c8dcbe722161ae059ba0ea3e8
         for num, item in zip(range(1, len(stock_data) + 1), stock_data):
             intraday_update_query = """INSERT INTO %s VALUES (%s, '%s', '%s', %f, %f, %f, %f)""" % (
                 stock_symbol, num, stock_symbol, item[0], item[1], item[2], item[3], item[4])
@@ -168,5 +195,9 @@ class Database:
                                                    "Close": close_value}
 
         return daily_stock_data
+<<<<<<< HEAD
 
 
+=======
+    
+>>>>>>> 90f66e589bd5df0c8dcbe722161ae059ba0ea3e8
