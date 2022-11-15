@@ -12,7 +12,7 @@ class System:
         self.database = DB.Database('localhost', 'root', "#abcd", 'soen6441', self.stocks)
         self.intraday_data, self.hourly_data, self.daily_data, self.weekly_data = {}, {}, {}, {}
         # Updating master data is not frequently done. Commenting it due to API call restriction of 5 calls/min
-        # self.add_stocks(self.stocks)
+        self.add_stocks(self.stocks)
         self.get_intraday_data(self.stocks)
         self.get_hourly_data(self.database.connection)
         self.get_daily_data(self.database.connection)

@@ -11,6 +11,17 @@ class DBConnector(object):
             try:
                 cls.__connection = mysql.connector.connect(host=host, user=user, password=pwd)
                 print("Connected to Server: Admin")
+
+                cursor = cls.__connection.cursor()
+                result = None
+                cursor.execute("SHOW DATABASES")
+                result = cursor.fetchall()
+
+                if ("{0}".format(db_name),) not in result:
+                    cursor.execute("CREATE DATABASE {0}".format(db_name))
+                    cls.__connection.commit()
+                    print("Created Database: ", db_name)
+
                 cls.__connection = mysql.connector.connect(host=host, user=user, password=pwd, database=db_name)
                 print("Connected to Database: ", db_name)
 
@@ -21,7 +32,6 @@ class DBConnector(object):
 
     def __init__(self):
         if DBConnector.__connection is not None:
-            raise Exception("Only single instance is permitted!!!")
+            raise Exception("Only Single Instance is Permitted!!!")
         else:
             DBConnector.__connection = self
-
